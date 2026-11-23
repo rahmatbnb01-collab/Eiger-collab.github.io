@@ -1,1 +1,43 @@
-<h1>Halo Dunia!</h1>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Dashboard — EIGER Store Buaran Cakung (2026)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1>Sales Dashboard — EIGER Store Buaran Cakung</h1>
+        <p class="subtitle">Periode Januari – Oktober 2026 (27.700 baris transaksi terverifikasi)</p>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="monthly" role="tab">Tren Bulanan</button>
+        <button class="tab-btn" data-tab="categories" role="tab">Kategori Produk</button>
+        <button class="tab-btn" data-tab="salespersons" role="tab">Sales Person</button>
+      </div>
+    </header>
+
+    <section class="kpi-grid" id="kpiGrid"></section>
+
+    <main class="card">
+      <div class="card-toolbar">
+        <h2 id="chartTitle">Penjualan Bersih &amp; Diskon Bulanan (Rp)</h2>
+        <div id="monthlyControls" class="sub-controls">
+          <button class="chip-btn active" data-metric="revenue">Net Sales vs Diskon</button>
+          <button class="chip-btn" data-metric="orders">Jumlah Pesanan (Orders)</button>
+        </div>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="mainChart"></canvas>
+      </div>
+      <div class="table-container" id="tableContainer"></div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
