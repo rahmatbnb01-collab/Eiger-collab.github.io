@@ -62,7 +62,19 @@ let activeMetric = "net_sales";
 let overviewChart = null;
 let categoryDonut = null;
 
+function syncMetricButtons() {
+  const modeBtn = document.getElementById("toggleChartMode");
+  if (modeBtn) {
+    modeBtn.textContent = activeMetric === "net_sales" ? "Mode: Net Sales" : "Mode: Orders";
+  }
+  document.querySelectorAll(".pill").forEach((b) => {
+    b.classList.toggle("active", b.dataset.metric === activeMetric);
+  });
+}
+
 function renderKPIs() {
+  const kpiRow = document.getElementById("kpiRow");
+  if (!kpiRow) return;
   const { totals } = DATA;
   const cards = [
     { title: "Total Net Sales", value: fmtIDR(totals.net_sales), meta: `Diskon ${totals.disc_rate_pct.toFixed(1)}% dari Gross`, hero: true },
@@ -71,7 +83,7 @@ function renderKPIs() {
     { title: "Avg Order Value", value: fmtIDR(totals.aov), meta: "Rata-rata per pesanan unik", hero: false }
   ];
 
-  document.getElementById("kpiRow").innerHTML = cards.map((c) => `
+  kpiRow.innerHTML = cards.map((c) => `
     <div class="kpi-card ${c.hero ? "hero" : ""}">
       <div class="kpi-title">${c.title}</div>
       <div class="kpi-num">${c.value}</div>
@@ -81,8 +93,10 @@ function renderKPIs() {
 }
 
 function renderOverviewChart() {
+  const canvas = document.getElementById("overviewChart");
+  if (!canvas || typeof Chart === "undefined") return;
   if (overviewChart) overviewChart.destroy();
-  const ctx = document.getElementById("overviewChart").getContext("2d");
+  const ctx = canvas.getContext("2d");
   const isRev = activeMetric === "net_sales";
 
   overviewChart = new Chart(ctx, {
@@ -123,9 +137,12 @@ function renderOverviewChart() {
 }
 
 function renderCategoryDonut() {
+  const canvas = document.getElementById("categoryDonut");
+  const legendEl = document.getElementById("categoryLegend");
+  if (!canvas || !legendEl || typeof Chart === "undefined") return;
   if (categoryDonut) categoryDonut.destroy();
   const top5 = DATA.categories.slice(0, 5);
-  const ctx = document.getElementById("categoryDonut").getContext("2d");
+  const ctx = canvas.getContext("2d");
 
   categoryDonut = new Chart(ctx, {
     type: "doughnut",
@@ -145,7 +162,7 @@ function renderCategoryDonut() {
     }
   });
 
-  document.getElementById("categoryLegend").innerHTML = top5.map((c, idx) => `
+  legendEl.innerHTML = top5.map((c, idx) => `
     <li class="legend-item">
       <span><span class="dot" style="background:${PALETTE[idx]}"></span>${c.category}</span>
       <strong>${c.share_pct.toFixed(1)}%</strong>
@@ -156,58 +173,108 @@ function renderCategoryDonut() {
 function renderLists(query = "") {
   const q = query.trim().toLowerCase();
 
-  const filteredProducts = DATA.top_products.filter((p) => p.sku_name.toLowerCase().includes(q));
-  document.getElementById("topProductsList").innerHTML = filteredProducts.map((p) => `
-    <div class="row-item">
-      <div>
-        <div class="row-main">${p.sku_name}</div>
-        <div class="row-sub">${fmtNum(p.qty)} unit · ${fmtNum(p.orders)} order</div>
-      </div>
-      <strong>${fmtIDR(p.net_sales)}</strong>
-    </div>
-  `).join("");
+  const topProdEl = document.getElementById("topProductsList");
+  if (topProdEl) {
+    const filteredProducts = DATA.top_products.filter((p) => p.sku_name.toLowerCase().includes(q));
+    topProdEl.innerHTML = filteredProducts.length
+      ? filteredProducts.map((p) => `
+          <div class="row-item">
+            <div>
+              <div class="row-main">${p.sku_name}</div>
+              <div class="row-sub">${fmtNum(p.qty)} unit · ${fmtNum(p.orders)} order</div>
+            </div>
+            <strong>${fmtIDR(p.net_sales)}</strong>
+          </div>
+        `).join("")
+      : `<div class="row-sub">Tidak ada produk cocok.</div>`;
+  }
 
-  const filteredOrders = DATA.recent_orders.filter((o) =>
-    o.sku_name.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q) || o.order_no.includes(q)
-  );
-  document.getElementById("recentOrdersList").innerHTML = filteredOrders.map((o) => `
-    <div class="row-item">
-      <div>
-        <div class="row-main">${o.customer}</div>
-        <div class="row-sub">#${o.order_no} · ${o.sku_name}</div>
-      </div>
-      <div>
-        <div><strong>${fmtIDR(o.net_sales)}</strong></div>
-        <span class="status-tag">${o.status}</span>
-      </div>
-    </div>
-  `).join("");
+  const recentOrdEl = document.getElementById("recentOrdersList");
+  if (recentOrdEl) {
+    const filteredOrders = DATA.recent_orders.filter((o) =>
+      o.sku_name.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q) || o.order_no.includes(q)
+    );
+    recentOrdEl.innerHTML = filteredOrders.length
+      ? filteredOrders.map((o) => `
+          <div class="row-item">
+            <div>
+              <div class="row-main">${o.customer}</div>
+              <div class="row-sub">#${o.order_no} · ${o.sku_name}</div>
+            </div>
+            <div>
+              <div><strong>${fmtIDR(o.net_sales)}</strong></div>
+              <span class="status-tag">${o.status}</span>
+            </div>
+          </div>
+        `).join("")
+      : `<div class="row-sub">Tidak ada pesanan cocok.</div>`;
+  }
 
-  document.getElementById("salesPersonList").innerHTML = DATA.sales_persons.map((s) => `
-    <div class="row-item">
-      <div>
-        <div class="row-main">${s.sales_person}</div>
-        <div class="row-sub">${fmtNum(s.orders)} order</div>
+  const spEl = document.getElementById("salesPersonList");
+  if (spEl) {
+    const filteredSp = DATA.sales_persons.filter((s) => s.sales_person.toLowerCase().includes(q));
+    spEl.innerHTML = (filteredSp.length ? filteredSp : DATA.sales_persons).map((s) => `
+      <div class="row-item">
+        <div>
+          <div class="row-main">${s.sales_person}</div>
+          <div class="row-sub">${fmtNum(s.orders)} order</div>
+        </div>
+        <strong>${fmtIDR(s.net_sales)}</strong>
       </div>
-      <strong>${fmtIDR(s.net_sales)}</strong>
-    </div>
-  `).join("");
+    `).join("");
+  }
 }
 
-document.querySelectorAll(".pill").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".pill").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    activeMetric = btn.dataset.metric;
-    renderOverviewChart();
+function bindEvents() {
+  document.querySelectorAll(".nav-item").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".nav-item").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const section = btn.dataset.section;
+      const targetMap = {
+        overview: ".kpi-row",
+        categories: "#categoryDonut",
+        products: "#topProductsList",
+        orders: "#recentOrdersList"
+      };
+      const target = document.querySelector(targetMap[section]);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
   });
-});
 
-document.getElementById("searchInput").addEventListener("input", (e) => {
-  renderLists(e.target.value);
-});
+  document.querySelectorAll(".pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeMetric = btn.dataset.metric;
+      syncMetricButtons();
+      renderOverviewChart();
+    });
+  });
 
-renderKPIs();
-renderOverviewChart();
-renderCategoryDonut();
-renderLists();
+  const modeBtn = document.getElementById("toggleChartMode");
+  if (modeBtn) {
+    modeBtn.addEventListener("click", () => {
+      activeMetric = activeMetric === "net_sales" ? "orders" : "net_sales";
+      syncMetricButtons();
+      renderOverviewChart();
+    });
+  }
+
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      renderLists(e.target.value);
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  bindEvents();
+  syncMetricButtons();
+  renderKPIs();
+  renderOverviewChart();
+  renderCategoryDonut();
+  renderLists();
+});
