@@ -3,39 +3,103 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sales Dashboard — EIGER Store Buaran Cakung (2026)</title>
+  <title>Sales Dashboard — EIGER Store Buaran Cakung</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <div>
-        <h1>Sales Dashboard — EIGER Store Buaran Cakung</h1>
-        <p class="subtitle">Periode Januari – Oktober 2026 (27.700 baris transaksi terverifikasi)</p>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">E</span>
+        <span class="brand-name">EigerStore</span>
       </div>
-      <div class="tabs" role="tablist">
-        <button class="tab-btn active" data-tab="monthly" role="tab">Tren Bulanan</button>
-        <button class="tab-btn" data-tab="categories" role="tab">Kategori Produk</button>
-        <button class="tab-btn" data-tab="salespersons" role="tab">Sales Person</button>
+      <nav class="nav-list">
+        <button class="nav-item active" data-section="overview">Dashboard</button>
+        <button class="nav-item" data-section="categories">Categories</button>
+        <button class="nav-item" data-section="products">Top Products</button>
+        <button class="nav-item" data-section="orders">Recent Orders</button>
+      </nav>
+      <div class="sidebar-footer">
+        <p class="store-caption">2022 - EIGER Store Buaran Cakung</p>
+        <span class="badge-period">Jan – Okt 2026</span>
       </div>
-    </header>
+    </aside>
 
-    <section class="kpi-grid" id="kpiGrid"></section>
+    <div class="main-shell">
+      <header class="topbar">
+        <input type="text" id="searchInput" class="search-box" placeholder="Cari SKU, kategori, atau pelanggan..." />
+        <div class="period-pill">01 Jan 2026 – 31 Okt 2026</div>
+      </header>
 
-    <main class="card">
-      <div class="card-toolbar">
-        <h2 id="chartTitle">Penjualan Bersih &amp; Diskon Bulanan (Rp)</h2>
-        <div id="monthlyControls" class="sub-controls">
-          <button class="chip-btn active" data-metric="revenue">Net Sales vs Diskon</button>
-          <button class="chip-btn" data-metric="orders">Jumlah Pesanan (Orders)</button>
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <h1>Sales Dashboard</h1>
+            <p>Pantau performa penjualan bersih, kategori produk, dan transaksi terbaru EIGER Store Buaran Cakung.</p>
+          </div>
+          <button class="btn-dark" id="toggleChartMode">Mode: Net Sales</button>
         </div>
-      </div>
-      <div class="chart-wrapper">
-        <canvas id="mainChart"></canvas>
-      </div>
-      <div class="table-container" id="tableContainer"></div>
-    </main>
+
+        <section class="kpi-row" id="kpiRow"></section>
+
+        <section class="mid-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Sales Overview</h2>
+                <p>Tren bulanan 01 Jan 2026 – 31 Okt 2026</p>
+              </div>
+              <div class="pill-group">
+                <button class="pill active" data-metric="net_sales">Net Sales</button>
+                <button class="pill" data-metric="orders">Orders</button>
+              </div>
+            </div>
+            <div class="chart-box">
+              <canvas id="overviewChart"></canvas>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Sales by Category</h2>
+                <p>Kontribusi Category Lv.3</p>
+              </div>
+            </div>
+            <div class="category-layout">
+              <div class="donut-box">
+                <canvas id="categoryDonut"></canvas>
+              </div>
+              <ul class="legend-list" id="categoryLegend"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="bottom-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Top Selling Products</h2>
+            </div>
+            <div id="topProductsList"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Recent Orders</h2>
+            </div>
+            <div id="recentOrdersList"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Top Sales Person</h2>
+            </div>
+            <div id="salesPersonList"></div>
+          </div>
+        </section>
+      </main>
+    </div>
   </div>
 
   <script src="app.js"></script>
